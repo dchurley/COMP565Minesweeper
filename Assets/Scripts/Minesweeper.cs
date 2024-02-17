@@ -26,11 +26,13 @@ public class Minesweeper : MonoBehaviour
 
                 var cd = go.GetComponent<CellData>();
 
+                go.transform.GetChild(2).gameObject.SetActive(false);
+
                 if(Random.Range(1,10) > 5)
                 {
                     cd.isBomb = true;
                     //go.transform.GetComponent<Renderer>().material.color = Color.red;
-                    go.GetComponentInChildren<Renderer>().material.color = Color.red;
+                    //go.GetComponentInChildren<Renderer>().material.color = Color.red;
                 }
             }
         }
@@ -47,6 +49,21 @@ public class Minesweeper : MonoBehaviour
             if(Physics.Raycast(ray, out tmpHitHighlight, 100))
             {
                 Debug.Log($"We have a hit: {tmpHitHighlight.transform.name}");
+                //get the parent of the hit obj
+                var par = tmpHitHighlight.transform.parent;
+                var cd = par.gameObject.GetComponent<CellData>();
+
+                par.GetChild(1).gameObject.SetActive(false);
+                if(cd.isBomb)
+                {
+                    par.GetChild(2).gameObject.SetActive(true);
+                    par.GetChild(0).gameObject.GetComponent<Renderer>().material.color = Color.red;
+                }
+                //if(tmpHitHighlight.transform.name.Equals("cover cube"))
+                //{
+                //    tmpHitHighlight.transform.gameObject.SetActive(false); 
+
+                //}
             }
         }
     }
