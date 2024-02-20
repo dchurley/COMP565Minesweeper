@@ -12,6 +12,7 @@ public class CellData : MonoBehaviour
     public bool isBomb; //is it a bomb
     public int cellValue; //number of surrounding bombs
 
+    //row and column for searching later
     public int r;
     public int c;
 
