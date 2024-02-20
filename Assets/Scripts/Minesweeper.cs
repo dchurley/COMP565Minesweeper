@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Minesweeper : MonoBehaviour
@@ -13,30 +14,77 @@ public class Minesweeper : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        for(int i = 0; i < 9; i++)
+        //set up a virtual game to get the logic right
+        int ROWS = 9;
+        int COLUMNS = 9;
+        int[][] virtualGrid = new int[ROWS][];
+
+        for(int i = 0; i < ROWS; i++) {
+            virtualGrid[i] = new int[COLUMNS];
+        }
+
+        //create some bombs
+        for (int i = 0; i < ROWS; i++)
         {
-            for (int j = 0; j < 9; j++)
+            for (int j = 0; j < COLUMNS; j++)
             {
-                //var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                var go = GameObject.Instantiate(cellPrefab, Vector3.zero, Quaternion.identity);
+                if (Random.Range(1, 10) > 8)
+                {
+                    //-1 will mean bomb
+                    virtualGrid[i][j] = -1;
+                }
+            }
+        }
+
+        //for the rest of the cells, generate their value of bombs nearby
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLUMNS; j++)
+            {
+                //skip if this cell is a bomb, it doesnt need a bomb count
+                if (virtualGrid[i][j] == -1)
+                {
+                    continue;
+                }
+                int bombCount = 0;
+                //for the 8 cells around this cell...
+                int[] dx = { -1, 0, 1, -1, 1, -1, 0, 1 };
+                int[] dy = { -1, -1, -1, 0, 0, 1, 1, 1 };
+                for (int k = 0; k < 8; k++)
+                {
+                    int ni = i + dx[k], nj = j + dy[k];
+                    if (ni >= 0 && ni < ROWS && nj >= 0 && nj < COLUMNS && virtualGrid[ni][nj] == -1)
+                    {
+                        bombCount++;
+                    }
+                }
+
+                virtualGrid[i][j] = bombCount;
+            }
+        }
+
+
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLUMNS; j++)
+            {
+
+                var go = Instantiate(cellPrefab, Vector3.zero, Quaternion.identity);
                 go.transform.position = new Vector3(i,0,j);
-                //go.transform.localScale = new Vector3(1, 0.1f, 1);
                 go.transform.name = $"[{i},{j}]";
-                //go.transform.GetComponent<Renderer>().material = cellMaterial;
 
                 var cd = go.GetComponent<CellData>();
 
                 go.transform.GetChild(2).gameObject.SetActive(false);
 
-                if(Random.Range(1,10) > 5)
-                {
-                    cd.isBomb = true;
-                    //go.transform.GetComponent<Renderer>().material.color = Color.red;
-                    //go.GetComponentInChildren<Renderer>().material.color = Color.red;
-                }
+                cd.r = i;
+                cd.c = j;
+                cd.cellValue = virtualGrid[i][j];
+                cd.isBomb = virtualGrid[i][j] == -1 ? true: false;
+
             }
         }
-        
+
     }
 
     // Update is called once per frame
@@ -53,17 +101,20 @@ public class Minesweeper : MonoBehaviour
                 var par = tmpHitHighlight.transform.parent;
                 var cd = par.gameObject.GetComponent<CellData>();
 
-                par.GetChild(1).gameObject.SetActive(false);
-                if(cd.isBomb)
-                {
-                    par.GetChild(2).gameObject.SetActive(true);
-                    par.GetChild(0).gameObject.GetComponent<Renderer>().material.color = Color.red;
-                }
-                //if(tmpHitHighlight.transform.name.Equals("cover cube"))
-                //{
-                //    tmpHitHighlight.transform.gameObject.SetActive(false); 
+                cd.click();
+            }
+        }
 
-                //}
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (Physics.Raycast(ray, out tmpHitHighlight, 100))
+            {
+                Debug.Log($"We have a hit: {tmpHitHighlight.transform.name}");
+                //get the parent of the hit obj
+                var par = tmpHitHighlight.transform.parent;
+                var cd = par.gameObject.GetComponent<CellData>();
+
+                cd.toggleFlag();
             }
         }
     }

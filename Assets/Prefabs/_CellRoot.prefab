@@ -152,6 +152,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 551114628ad349a43aff174211e18b98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cellMaterials:
+  - {fileID: 2100000, guid: 1153ce070d529644787538e8ebc825f4, type: 2}
+  - {fileID: 2100000, guid: be5b3157fd4dca04e9738d3c102357ce, type: 2}
+  - {fileID: 2100000, guid: 90c7d07df57602d4086e6f260b68b412, type: 2}
+  - {fileID: 2100000, guid: a592fed42f654c340b07e36f665a5c90, type: 2}
+  - {fileID: 2100000, guid: 8b635dbb3fa79634c9a0dbb1a4eb8b3c, type: 2}
+  - {fileID: 2100000, guid: 4d0c239beac4db244a4117736516ea4f, type: 2}
+  - {fileID: 2100000, guid: 3dea261245713e9418a534de5ac47fe0, type: 2}
+  - {fileID: 2100000, guid: d4c05e687b806e74690c4c1be7e96e50, type: 2}
+  - {fileID: 2100000, guid: 1c5e03067480d3f4d97da47458c75605, type: 2}
+  - {fileID: 2100000, guid: 90ad97a6fc455854f95a0232e4165a5e, type: 2}
   isBomb: 0
   cellValue: 0
   selected: 0
@@ -322,7 +333,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 1153ce070d529644787538e8ebc825f4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
