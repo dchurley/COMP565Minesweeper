@@ -1,72 +1,98 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class Minesweeper : MonoBehaviour
 {
 
-    //public Material cellMaterial;
-
     public RaycastHit tmpHitHighlight;
     public GameObject cellPrefab;
 
-    // Start is called before the first frame update
+    public TextMeshProUGUI minesText;
+
+    public static int MINES;
+    public static int WIDTH;
+    public static int HEIGHT;
+
+    static System.Random random = new System.Random();
+
+    public static int[,] GenerateBoard(int width, int height, int totalMines)
+    {
+        int[,] board = new int[height, width];
+
+        // Place mines randomly
+        for (int i = 0; i < totalMines; i++)
+        {
+            int x, y;
+            do
+            {
+                x = random.Next(width);
+                y = random.Next(height);
+            } while (board[y, x] == -1); // Ensure we don't place a mine on top of another mine
+
+            board[y, x] = -1; // -1 represents a mine
+        }
+
+        // Fill in numbers indicating the number of adjacent mines for each cell
+        // Iterate over each cell
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                // If the cell is not a mine, calculate the number of adjacent mines
+                if (board[y, x] != -1)
+                {
+                    int count = CountAdjacentMines(board, x, y);
+                    board[y, x] = count;
+                }
+            }
+        }
+
+        return board;
+    }
+
+    static int CountAdjacentMines(int[,] board, int x, int y)
+    {
+        int height = board.GetLength(0);
+        int width = board.GetLength(1);
+        int count = 0;
+
+        // Iterate over adjacent cells
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                int neighborX = x + i;
+                int neighborY = y + j;
+
+                // Check if neighbor cell is within bounds and contains a mine
+                if (neighborX >= 0 && neighborX < width &&
+                    neighborY >= 0 && neighborY < height &&
+                    board[neighborY, neighborX] == -1)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+
     void Start()
     {
         //set up a virtual game to get the logic right
-        int ROWS = 9;
-        int COLUMNS = 9;
-        int[][] virtualGrid = new int[ROWS][];
+        int[,] virtualGrid = GenerateBoard(WIDTH, HEIGHT, MINES);
+        minesText.text = $"Mines: {MINES}";
 
-        for(int i = 0; i < ROWS; i++) {
-            virtualGrid[i] = new int[COLUMNS];
-        }
 
-        //create some bombs
-        for (int i = 0; i < ROWS; i++)
+
+        for (int i = 0; i < HEIGHT; i++)
         {
-            for (int j = 0; j < COLUMNS; j++)
-            {
-                if (Random.Range(1, 10) > 8)
-                {
-                    //-1 will mean bomb
-                    virtualGrid[i][j] = -1;
-                }
-            }
-        }
-
-        //for the rest of the cells, generate their value of bombs nearby
-        for (int i = 0; i < ROWS; i++)
-        {
-            for (int j = 0; j < COLUMNS; j++)
-            {
-                //skip if this cell is a bomb, it doesnt need a bomb count
-                if (virtualGrid[i][j] == -1)
-                {
-                    continue;
-                }
-                int bombCount = 0;
-                //for the 8 cells around this cell...
-                int[] dx = { -1, 0, 1, -1, 1, -1, 0, 1 };
-                int[] dy = { -1, -1, -1, 0, 0, 1, 1, 1 };
-                for (int k = 0; k < 8; k++)
-                {
-                    int ni = i + dx[k], nj = j + dy[k];
-                    if (ni >= 0 && ni < ROWS && nj >= 0 && nj < COLUMNS && virtualGrid[ni][nj] == -1)
-                    {
-                        bombCount++;
-                    }
-                }
-
-                virtualGrid[i][j] = bombCount;
-            }
-        }
-
-
-        for (int i = 0; i < ROWS; i++)
-        {
-            for (int j = 0; j < COLUMNS; j++)
+            for (int j = 0; j < WIDTH; j++)
             {
 
                 var go = Instantiate(cellPrefab, Vector3.zero, Quaternion.identity);
@@ -79,8 +105,8 @@ public class Minesweeper : MonoBehaviour
 
                 cd.r = i;
                 cd.c = j;
-                cd.cellValue = virtualGrid[i][j];
-                cd.isBomb = virtualGrid[i][j] == -1 ? true: false;
+                cd.cellValue = virtualGrid[i,j];
+                cd.isBomb = virtualGrid[i,j] == -1 ? true: false;
 
             }
         }
@@ -114,7 +140,11 @@ public class Minesweeper : MonoBehaviour
                 var par = tmpHitHighlight.transform.parent;
                 var cd = par.gameObject.GetComponent<CellData>();
 
-                cd.toggleFlag();
+                bool flagged = cd.toggleFlag();
+
+                MINES += flagged ? -1 : 1;
+
+                minesText.text = $"Mines: {MINES}";
             }
         }
     }
