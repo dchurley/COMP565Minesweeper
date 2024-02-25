@@ -19,6 +19,11 @@ public class Minesweeper : MonoBehaviour
     public static int WIDTH;
     public static int HEIGHT;
 
+    public static int hiddenCells;
+    public static int remainingMines;
+
+    bool gameOver = false;
+
     static System.Random random = new System.Random();
 
     public static int[,] GenerateBoard(int width, int height, int totalMines)
@@ -89,14 +94,16 @@ public class Minesweeper : MonoBehaviour
 
         //move the camera
         //if it's medium or hard move it, if its easy then the camera is fine
-        if(MINES == 40)
+        if (MINES == 20)
         {
             cameraTransform.position = new Vector3(4.0f, 11.14f, 8.52f);
         }
-        if (MINES == 80)
+        if (MINES == 40)
         {
             cameraTransform.position = new Vector3(5.7f, 12.98f, 9.81f);
         }
+
+        hiddenCells = WIDTH * HEIGHT;
 
         //hide the text and button
         resultText.gameObject.SetActive(false);
@@ -106,7 +113,7 @@ public class Minesweeper : MonoBehaviour
         //set up a virtual game to get the logic right
         int[,] virtualGrid = GenerateBoard(WIDTH, HEIGHT, MINES);
         minesText.text = $"Mines: {MINES}";
-
+        remainingMines = MINES;
 
 
         for (int i = 0; i < HEIGHT; i++)
@@ -115,7 +122,7 @@ public class Minesweeper : MonoBehaviour
             {
 
                 var go = Instantiate(cellPrefab, Vector3.zero, Quaternion.identity);
-                go.transform.position = new Vector3(i,0,j);
+                go.transform.position = new Vector3(i, 0, j);
                 go.transform.name = $"[{i},{j}]";
 
                 var cd = go.GetComponent<CellData>();
@@ -124,8 +131,8 @@ public class Minesweeper : MonoBehaviour
 
                 cd.r = i;
                 cd.c = j;
-                cd.cellValue = virtualGrid[i,j];
-                cd.isBomb = virtualGrid[i,j] == -1 ? true: false;
+                cd.cellValue = virtualGrid[i, j];
+                cd.isBomb = virtualGrid[i, j] == -1 ? true : false;
 
             }
         }
@@ -137,9 +144,9 @@ public class Minesweeper : MonoBehaviour
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !gameOver)
         {
-            if(Physics.Raycast(ray, out tmpHitHighlight, 100))
+            if (Physics.Raycast(ray, out tmpHitHighlight, 100))
             {
                 Debug.Log($"We have a hit: {tmpHitHighlight.transform.name}");
                 //get the parent of the hit obj
@@ -147,9 +154,9 @@ public class Minesweeper : MonoBehaviour
                 var cd = par.gameObject.GetComponent<CellData>();
 
                 cd.click();
-
-                if(cd.isBomb)
+                if (cd.isBomb)
                 {
+                    gameOver = true;
                     resultText.text = "YOU LOST!";
                     resultText.gameObject.SetActive(true);
                     button.SetActive(true);
@@ -160,7 +167,7 @@ public class Minesweeper : MonoBehaviour
                         {
 
                             var cell = GameObject.Find($"[{i},{j}]");
-                            if(cell != null)
+                            if (cell != null)
                             {
                                 var cellData = cell.GetComponent<CellData>();
                                 cellData.reveal();
@@ -169,10 +176,21 @@ public class Minesweeper : MonoBehaviour
                         }
                     }
                 }
+                else if (hiddenCells == MINES)
+                {
+                    gameOver = true;
+                    resultText.text = "YOU WON!";
+                    resultText.gameObject.SetActive(true);
+                    button.SetActive(true);
+                }
+
+
+
+
             }
         }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) && !gameOver)
         {
             if (Physics.Raycast(ray, out tmpHitHighlight, 100))
             {
@@ -183,9 +201,9 @@ public class Minesweeper : MonoBehaviour
 
                 bool flagged = cd.toggleFlag();
 
-                MINES += flagged ? -1 : 1;
+                remainingMines += flagged ? -1 : 1;
 
-                minesText.text = $"Mines: {MINES}";
+                minesText.text = $"Mines: {remainingMines}";
             }
         }
     }

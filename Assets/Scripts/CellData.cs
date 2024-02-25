@@ -17,7 +17,7 @@ public class CellData : MonoBehaviour
     public int c;
 
     public bool selected; //is it selected
-    bool flagged; //is it flagged
+    public bool flagged; //is it flagged
     // Start is called before the first frame update
     void Start()
     {
@@ -58,6 +58,7 @@ public class CellData : MonoBehaviour
             return;
         }
 
+        Minesweeper.hiddenCells--;
         reveal();
 
         //if it's a 0 cell, then open up all the squares around it automatically because they are guaranteed safe
