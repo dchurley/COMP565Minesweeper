@@ -37,4 +37,9 @@ public class MainMenu : MonoBehaviour
         Minesweeper.HEIGHT = 10;
         SceneManager.LoadScene("Minesweeper");
     }
+
+    public void quit()
+    {
+        Application.Quit();
+    }
 }

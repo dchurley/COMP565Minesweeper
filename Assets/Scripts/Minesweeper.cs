@@ -10,8 +10,10 @@ public class Minesweeper : MonoBehaviour
 
     public RaycastHit tmpHitHighlight;
     public GameObject cellPrefab;
-
     public TextMeshProUGUI minesText;
+    public TextMeshProUGUI resultText;
+    public GameObject button;
+    public Transform cameraTransform;
 
     public static int MINES;
     public static int WIDTH;
@@ -84,6 +86,23 @@ public class Minesweeper : MonoBehaviour
 
     void Start()
     {
+
+        //move the camera
+        //if it's medium or hard move it, if its easy then the camera is fine
+        if(MINES == 40)
+        {
+            cameraTransform.position = new Vector3(4.0f, 11.14f, 8.52f);
+        }
+        if (MINES == 80)
+        {
+            cameraTransform.position = new Vector3(5.7f, 12.98f, 9.81f);
+        }
+
+        //hide the text and button
+        resultText.gameObject.SetActive(false);
+        button.SetActive(false);
+
+
         //set up a virtual game to get the logic right
         int[,] virtualGrid = GenerateBoard(WIDTH, HEIGHT, MINES);
         minesText.text = $"Mines: {MINES}";
@@ -128,6 +147,28 @@ public class Minesweeper : MonoBehaviour
                 var cd = par.gameObject.GetComponent<CellData>();
 
                 cd.click();
+
+                if(cd.isBomb)
+                {
+                    resultText.text = "YOU LOST!";
+                    resultText.gameObject.SetActive(true);
+                    button.SetActive(true);
+
+                    for (int i = 0; i < HEIGHT; i++)
+                    {
+                        for (int j = 0; j < WIDTH; j++)
+                        {
+
+                            var cell = GameObject.Find($"[{i},{j}]");
+                            if(cell != null)
+                            {
+                                var cellData = cell.GetComponent<CellData>();
+                                cellData.reveal();
+                            }
+
+                        }
+                    }
+                }
             }
         }
 

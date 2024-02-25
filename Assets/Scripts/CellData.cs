@@ -32,16 +32,18 @@ public class CellData : MonoBehaviour
 
     public bool toggleFlag()
     {
-
+        //change the flagged state
         flagged = !flagged;
 
         var tr = gameObject.transform;
         if(flagged )
         {
+            //set green if flagged
             tr.GetChild(1).gameObject.GetComponent<Renderer>().material.color = Color.green;
         }
         else
         {
+            //set white for unflagged
             tr.GetChild(1).gameObject.GetComponent<Renderer>().material.color = Color.white;
         }
 
@@ -50,24 +52,15 @@ public class CellData : MonoBehaviour
 
     public void click()
     {
+        //if it's already clicked or flagged then do nothing
         if(selected || flagged)
         {
             return;
         }
-        selected = true;
 
-        var tr = gameObject.transform;
-        tr.GetChild(1).gameObject.SetActive(false);
-        if (isBomb)
-        {
-            tr.GetChild(2).gameObject.SetActive(true);
-            tr.GetChild(0).gameObject.GetComponent<Renderer>().material.color = Color.red;
-        }
-        else
-        {
-            tr.GetChild(0).GetComponent<Renderer>().material = cellMaterials[cellValue];
-        }
+        reveal();
 
+        //if it's a 0 cell, then open up all the squares around it automatically because they are guaranteed safe
         if(cellValue == 0)
         {
             int[] dx = { -1, 0, 1, -1, 1, -1, 0, 1 };
@@ -83,6 +76,24 @@ public class CellData : MonoBehaviour
                 }
             }
         }
+    }
 
+    public void reveal()
+    {
+        selected = true;
+
+        var tr = gameObject.transform;
+        tr.GetChild(1).gameObject.SetActive(false);
+        if (isBomb)
+        {
+            //activate the sphere and turn it red
+            tr.GetChild(2).gameObject.SetActive(true);
+            tr.GetChild(0).gameObject.GetComponent<Renderer>().material.color = Color.red;
+        }
+        else
+        {
+            //set the material to the number texture
+            tr.GetChild(0).GetComponent<Renderer>().material = cellMaterials[cellValue];
+        }
     }
 }
