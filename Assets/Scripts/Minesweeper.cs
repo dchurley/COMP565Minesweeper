@@ -144,6 +144,7 @@ public class Minesweeper : MonoBehaviour
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
+        //for left click
         if (Input.GetMouseButtonDown(0) && !gameOver)
         {
             if (Physics.Raycast(ray, out tmpHitHighlight, 100))
@@ -190,6 +191,7 @@ public class Minesweeper : MonoBehaviour
             }
         }
 
+        //for right click
         if (Input.GetMouseButtonDown(1) && !gameOver)
         {
             if (Physics.Raycast(ray, out tmpHitHighlight, 100))
@@ -199,9 +201,15 @@ public class Minesweeper : MonoBehaviour
                 var par = tmpHitHighlight.transform.parent;
                 var cd = par.gameObject.GetComponent<CellData>();
 
-                bool flagged = cd.toggleFlag();
-
-                remainingMines += flagged ? -1 : 1;
+                if(!cd.flagged && remainingMines == 0)
+                {
+                    return;
+                }
+                cd.toggleFlag();
+                if (!cd.selected)
+                {
+                    remainingMines += cd.flagged ? -1 : 1;
+                }
 
                 minesText.text = $"Mines: {remainingMines}";
             }

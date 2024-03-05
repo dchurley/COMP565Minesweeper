@@ -30,8 +30,12 @@ public class CellData : MonoBehaviour
     
     }
 
-    public bool toggleFlag()
+    public void toggleFlag()
     {
+        if(selected)
+        {
+            return;
+        }
         //change the flagged state
         flagged = !flagged;
 
@@ -47,7 +51,7 @@ public class CellData : MonoBehaviour
             tr.GetChild(1).gameObject.GetComponent<Renderer>().material.color = Color.white;
         }
 
-        return flagged;
+        return;
     }
 
     public void click()
